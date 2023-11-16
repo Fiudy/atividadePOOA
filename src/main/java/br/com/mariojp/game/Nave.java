@@ -14,7 +14,7 @@ public class Nave extends Sprite {
 
     private ArrayList<Missil> missiles;
 
-    private Nave(int x, int y, int alcance) { // Make the constructor private
+    private Nave(int x, int y, int alcance) { 
         super(x, y);
         this.alcance = alcance;
         initNave();
@@ -78,9 +78,9 @@ public class Nave extends Sprite {
         return missiles;
     }
 
-    public static synchronized Nave getInstance(int x, int y, int alcance) { // Synchronized method to ensure thread-safety
+    public static synchronized Nave getInstance(int x, int y, int alcance) { 
         if (instance == null) {
-            instance = new Nave(x, y, alcance); // Create the instance if it doesn't exist
+            instance = new Nave(x, y, alcance); 
         }
         return instance;
     }
