@@ -11,7 +11,7 @@ public class Inimigo extends Sprite {
 	}
 
 	private void initInimigo() {
-		carregarImagem("/imagens/alien.png");
+		carregarImagem("/imagens/naveA.png");
 		getImageDimensions();
 	}
 

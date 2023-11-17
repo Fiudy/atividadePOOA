@@ -84,4 +84,11 @@ public class Nave extends Sprite {
         }
         return instance;
     }
+
+    public void setX(int i) {
+    }
+
+    public void ajustarVelocidade(int i) {
+    }
+
 }
