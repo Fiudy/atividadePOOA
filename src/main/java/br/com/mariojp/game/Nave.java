@@ -68,6 +68,7 @@ public class Nave extends Sprite {
     private void atira() {
         long now = System.currentTimeMillis();
 
+        // Se o tempo entre o último tiro e o atual for maior que o tempo de recarga, não atira
         if (now - lastFire >= FIRE_COOLDOWN) {
             EfeitoSonoroDisparo();
             missiles.add(new Missil(x + width, y + height / 2, alcance));
@@ -108,6 +109,7 @@ public class Nave extends Sprite {
     public void ajustarVelocidade(int i) {
     }
 
+    // Efeito sonoro do disparo
     private void EfeitoSonoroDisparo() {
         try {
             File audioFile = new File("src\\main\\resources\\imagens\\disparo.wav");

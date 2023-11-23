@@ -100,6 +100,7 @@ public class Jogo extends JPanel implements ActionListener {
         mensagemLabel.setForeground(Color.WHITE);
         add(mensagemLabel);
 
+
         timer = new Timer(DELAY, this);
         timer.start();
         timeElapsed = 0;
@@ -108,6 +109,7 @@ public class Jogo extends JPanel implements ActionListener {
         timerLabel.setForeground(Color.WHITE);
         add(timerLabel);
 
+        // Timer para atualizar o tempo decorrido
         timer2 = new Timer(1000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -133,6 +135,7 @@ public class Jogo extends JPanel implements ActionListener {
         timer2.restart();
     }
 
+    // Método para atualizar a pontuação
     public void updateScore() {
         scoreLabel.setText("Pontos: " + score);
     }

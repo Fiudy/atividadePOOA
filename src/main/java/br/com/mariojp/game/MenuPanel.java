@@ -39,30 +39,29 @@ public class MenuPanel extends JPanel {
         startButton = new JButton("Começar");
         exitButton = new JButton("Sair");
 
-        startButton.setPreferredSize(new Dimension(200, 70)); 
-        exitButton.setPreferredSize(new Dimension(200, 70)); 
+        startButton.setPreferredSize(new Dimension(200, 70));
+        exitButton.setPreferredSize(new Dimension(200, 70));
 
-        // Adicionar animações aos botões
-       // Adicionar animações aos botões
-startButton.addMouseListener(new MouseAdapter() {
-    public void mouseEntered(MouseEvent evt) {
-        startButton.setBackground(new Color(153, 255, 153)); // Verde suave
-    }
+        // Adiciona hover nos botões
+        startButton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent evt) {
+                startButton.setBackground(new Color(153, 255, 153)); // Verde suave
+            }
 
-    public void mouseExited(MouseEvent evt) {
-        startButton.setBackground(UIManager.getColor("control"));
-    }
-});
+            public void mouseExited(MouseEvent evt) {
+                startButton.setBackground(UIManager.getColor("control"));
+            }
+        });
 
-exitButton.addMouseListener(new MouseAdapter() {
-    public void mouseEntered(MouseEvent evt) {
-        exitButton.setBackground(new Color(255, 102, 102)); // Vermelho suave
-    }
+        exitButton.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent evt) {
+                exitButton.setBackground(new Color(255, 102, 102)); // Vermelho suave
+            }
 
-    public void mouseExited(MouseEvent evt) {
-        exitButton.setBackground(UIManager.getColor("control"));
-    }
-});
+            public void mouseExited(MouseEvent evt) {
+                exitButton.setBackground(UIManager.getColor("control"));
+            }
+        });
 
         startButton.addActionListener(e -> principal.startGame());
         exitButton.addActionListener(e -> System.exit(0));
