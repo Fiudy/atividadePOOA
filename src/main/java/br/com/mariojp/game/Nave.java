@@ -3,18 +3,29 @@ package br.com.mariojp.game;
 import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+
+import java.io.File;
+import java.io.IOException;
 
 public class Nave extends Sprite {
 
-    private static Nave instance;
+    private static Nave instance; 
     private int dx;
     private int dy;
+
+    private long lastFire;
+    private static final long FIRE_COOLDOWN = 500;
 
     private int alcance;
 
     private ArrayList<Missil> missiles;
 
-    private Nave(int x, int y, int alcance) { 
+    private Nave(int x, int y, int alcance) {
         super(x, y);
         this.alcance = alcance;
         initNave();
@@ -55,7 +66,13 @@ public class Nave extends Sprite {
     }
 
     private void atira() {
-        missiles.add(new Missil(x + width, y + height / 2, alcance));
+        long now = System.currentTimeMillis();
+
+        if (now - lastFire >= FIRE_COOLDOWN) {
+            EfeitoSonoroDisparo();
+            missiles.add(new Missil(x + width, y + height / 2, alcance));
+            lastFire = now; 
+        }
     }
 
     public void keyReleased(KeyEvent e) {
@@ -78,9 +95,9 @@ public class Nave extends Sprite {
         return missiles;
     }
 
-    public static synchronized Nave getInstance(int x, int y, int alcance) { 
+    public static synchronized Nave getInstance(int x, int y, int alcance) {
         if (instance == null) {
-            instance = new Nave(x, y, alcance); 
+            instance = new Nave(x, y, alcance);
         }
         return instance;
     }
@@ -89,6 +106,18 @@ public class Nave extends Sprite {
     }
 
     public void ajustarVelocidade(int i) {
+    }
+
+    private void EfeitoSonoroDisparo() {
+        try {
+            File audioFile = new File("src\\main\\resources\\imagens\\disparo.wav");
+            AudioInputStream audioIn = AudioSystem.getAudioInputStream(audioFile);
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioIn);
+            clip.start();
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
     }
 
 }

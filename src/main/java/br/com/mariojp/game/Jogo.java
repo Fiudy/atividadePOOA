@@ -31,35 +31,69 @@ public class Jogo extends JPanel implements ActionListener {
     private boolean endgame = false;
     private final int DELAY = 10;
     private final int B_WIDTH = 800;
+    private boolean isPaused = false;
     private final int B_HEIGHT = 600;
-	private JButton returnButton;  // Botão de retorno
-    private JLabel mensagemLabel;  
+    private JButton returnButton; // Botão de retorno
+    private JLabel mensagemLabel;
+    private Timer timer2;
+    private JLabel timerLabel;
+    private JLabel scoreLabel;
+    private int timeElapsed;
 
     public Jogo() {
         setPreferredSize(new Dimension(B_WIDTH, B_HEIGHT));
         setDoubleBuffered(true);
         setBackground(Color.BLACK);
-    }
-
-    public void initGame() {
-         addKeyListener(new TAdapter());
-        setFocusable(true);
-        setLayout(null);  // Desativar o layout para posicionar livremente os componentes
-        setBackground(Color.BLACK);
-        setPreferredSize(new Dimension(B_WIDTH, B_HEIGHT));
-        setDoubleBuffered(true);
-        nave = Nave.getInstance(40, 60, B_WIDTH);
+        addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    isPaused = !isPaused; // Inverte o estado de pausa quando ESC é pressionado
+                    repaint(); // Força uma atualização da tela
+                }
+            }
+        });
 
         returnButton = new JButton("Retornar");
         returnButton.setBounds(10, 10, 100, 30);
         returnButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                reiniciarJogo();
+                if (isPaused) {
+                    isPaused = false; // Retoma o jogo quando o botão de retornar é clicado
+                }
             }
         });
-        returnButton.setVisible(false);  // Inicialmente invisível
+        returnButton.setVisible(false);
         add(returnButton);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (!isPaused) {
+            stopGame();
+            updateNave();
+            updateMissiles();
+            updateInimigo();
+            checkCollisions();
+            repaint();
+        }
+    }
+
+    public void initGame() { 
+    score = 0;
+    scoreLabel = new JLabel();
+    scoreLabel.setText("Pontos: " + score);
+    add(scoreLabel);
+    scoreLabel.setBounds(15, 5, 200, 30);  // Ajuste a posição e o tamanho conforme necessário
+    scoreLabel.setForeground(Color.WHITE);
+        addKeyListener(new TAdapter());
+        setFocusable(true);
+        setLayout(null); // Desativar o layout para posicionar livremente os componentes
+        setBackground(Color.BLACK);
+        setPreferredSize(new Dimension(B_WIDTH, B_HEIGHT));
+        setDoubleBuffered(true);
+        nave = Nave.getInstance(40, 60, B_WIDTH);
 
         mensagemLabel = new JLabel();
         mensagemLabel.setBounds(300, 250, 200, 30);
@@ -68,37 +102,49 @@ public class Jogo extends JPanel implements ActionListener {
 
         timer = new Timer(DELAY, this);
         timer.start();
-    }
+        timeElapsed = 0;
+        timerLabel = new JLabel();
+        timerLabel.setBounds(15, 20, 200, 30); 
+        timerLabel.setForeground(Color.WHITE);
+        add(timerLabel);
 
-	public void startGame() {
-		inimigos.clear();
-		score = 0;
-		endgame = false;
-		initGame();
-		requestFocusInWindow(); // Adicione esta linha
-	}
-
-	private void reiniciarJogo() {
-        endgame = false;
-        returnButton.setVisible(false);
-        score = 0;
-        nave.setVisible(true);
-        nave.setX(40);
-        nave.setX(60);
-        nave.ajustarVelocidade(3);
-        inimigos.clear();
-        mensagemLabel.setText("");  // Limpa a mensagem ao reiniciar o jogo
+        timer2 = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!isPaused) {
+                  timeElapsed++;  
+                }
+                timerLabel.setText("Tempo: " + timeElapsed + " segundos");
+            }
+        });
         timer.start();
     }
 
-	 private void drawGameOver(Graphics g) {
+
+    public void startGame() {
+        
+        inimigos.clear();
+        score = 0;
+       
+        endgame = false;
+        initGame();
+        requestFocusInWindow();
+        timeElapsed = 0;
+        timer2.restart();
+    }
+
+    public void updateScore() {
+        scoreLabel.setText("Pontos: " + score);
+    }
+
+    private void drawGameOver(Graphics g) {
         String msg = "Game Over";
         Font small = new Font("Helvetica", Font.BOLD, 14);
         FontMetrics fm = getFontMetrics(small);
         g.setColor(Color.white);
         g.setFont(small);
         g.drawString(msg, (B_WIDTH - fm.stringWidth(msg)) / 2, B_HEIGHT / 2);
-        returnButton.setVisible(true);  // Torna o botão visível ao final do jogo
+        returnButton.setVisible(true); // Torna o botão visível ao final do jogo
     }
 
     @Override
@@ -106,6 +152,14 @@ public class Jogo extends JPanel implements ActionListener {
         super.paintComponent(g);
         if (!endgame) {
             desenhar(g);
+            if (isPaused) {
+                g.setColor(Color.WHITE);
+                g.setFont(new Font("Arial", Font.BOLD, 30));
+                FontMetrics fm = g.getFontMetrics();
+                int x = (getWidth() - fm.stringWidth("Jogo pausado")) / 2;
+                int y = (getHeight() - fm.getHeight()) / 2 + fm.getAscent();
+                g.drawString("Pausado", x, y);
+            }
         } else {
             drawGameOver(g);
         }
@@ -125,8 +179,7 @@ public class Jogo extends JPanel implements ActionListener {
                 g.drawImage(i.getImage(), i.getX(), i.getY(), this);
             }
         }
-        g.setColor(Color.WHITE);
-        g.drawString("PONTOS : " + score, 5, 15);
+        
     }
 
     private void updateMissiles() {
@@ -141,17 +194,7 @@ public class Jogo extends JPanel implements ActionListener {
         }
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        stopGame();
-        updateNave();
-        updateMissiles();
-        updateInimigo();
-        checkCollisions();
-        repaint();
-    }
-
-	public void checkCollisions() {
+    public void checkCollisions() {
         Rectangle r3 = nave.getBounds();
         for (Inimigo alien : inimigos) {
             Rectangle r2 = alien.getBounds();
@@ -170,6 +213,7 @@ public class Jogo extends JPanel implements ActionListener {
                     m.setVisible(false);
                     alien.setVisible(false);
                     score++;
+                    updateScore();
                     if (score > 20) {
                         endgame = true;
                         exibirMensagemParabens();
@@ -179,45 +223,45 @@ public class Jogo extends JPanel implements ActionListener {
         }
     }
 
-	private void exibirMensagemParabens() {
+    private void exibirMensagemParabens() {
         mensagemLabel.setText("    Parabéns! Você ganhou!");
     }
 
-	private void updateInimigo() {
-		while (inimigos.size() < 5) {
-			inimigos.add(new Inimigo(B_WIDTH, random.nextInt(B_HEIGHT - 20) + 10));
-		}
+    private void updateInimigo() {
+        while (inimigos.size() < 5) {
+            inimigos.add(new Inimigo(B_WIDTH, random.nextInt(B_HEIGHT - 20) + 10));
+        }
 
-		for (int i = 0; i < inimigos.size(); i++) {
-			Inimigo inimigo = inimigos.get(i);
-			if (inimigo.isVisible()) {
-				inimigo.move();
-			} else {
-				inimigos.remove(inimigo);
-			}
-		}
+        for (int i = 0; i < inimigos.size(); i++) {
+            Inimigo inimigo = inimigos.get(i);
+            if (inimigo.isVisible()) {
+                inimigo.move();
+            } else {
+                inimigos.remove(inimigo);
+            }
+        }
 
-	}
+    }
 
-	private void stopGame() {
-		if (endgame) {
-			timer.stop();
-		}
-	}
+    private void stopGame() {
+        if (endgame) {
+            timer.stop();
+        }
+    }
 
-	private void updateNave() {
-		nave.move();
-	}
+    private void updateNave() {
+        nave.move();
+    }
 
-	private class TAdapter extends KeyAdapter {
-		@Override
-		public void keyReleased(KeyEvent e) {
-			nave.keyReleased(e);
-		}
+    private class TAdapter extends KeyAdapter {
+        @Override
+        public void keyReleased(KeyEvent e) {
+            nave.keyReleased(e);
+        }
 
-		@Override
-		public void keyPressed(KeyEvent e) {
-			nave.keyPressed(e);
-		}
-	}
+        @Override
+        public void keyPressed(KeyEvent e) {
+            nave.keyPressed(e);
+        }
+    }
 }
